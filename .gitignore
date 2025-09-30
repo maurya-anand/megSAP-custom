@@ -229,3 +229,6 @@ data/tools/ngsbits_settings.ini
 /*.sif
 /test/data_chrx/dragen_variant_calls
 Clair3-v1.0.10
+notes-comments.txt
+apptainer_container
+interop*
