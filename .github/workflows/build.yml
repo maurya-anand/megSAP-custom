@@ -35,4 +35,4 @@ jobs:
           apptainer registry login -u "${{ github.actor }}" --password "${{ secrets.GH_PAT }}" oras://ghcr.io
       - name: Push Container
         run: |
-          apptainer push container/megSAP_custom.sif oras://ghcr.io/${{ github.repository }}:${{ steps.meta.outputs.version }}
+          apptainer push container/megSAP_custom.sif oras://ghcr.io/megsap-custom:${{ steps.meta.outputs.version }}
