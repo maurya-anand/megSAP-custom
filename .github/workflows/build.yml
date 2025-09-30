@@ -1,0 +1,38 @@
+name: Apptainer Build Deploy
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    container:
+      image: ghcr.io/apptainer/apptainer:1.4.1
+      options: --privileged
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+      - name: Build Container
+        run: |
+          apptainer build container/megSAP_custom.sif container/megsap.def
+      - name: Login to Apptainer Registry
+        run: |
+          apptainer registry login -u "${{ github.actor }}" --password "${{ secrets.GH_PAT }}" oras://ghcr.io
+      - name: Push Container
+        run: |
+          apptainer push container/megSAP_custom.sif oras://ghcr.io/${{ github.repository }}:${{ steps.meta.outputs.version }}
