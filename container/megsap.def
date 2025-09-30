@@ -18,7 +18,7 @@ From: ubuntu:24.04
         apptainer && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    git clone https://github.com/maurya-anand/megSAP-custom.git && \
+    git clone https://github.com/maurya-anand/megSAP-custom.git megSAP && \
     chmod 755 megSAP/data/*.sh && \
     cd megSAP/data/ && \
     ./download_tools.sh
