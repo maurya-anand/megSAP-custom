@@ -14,7 +14,7 @@ From: ubuntu:24.04
     apt-get install -y --no-install-recommends \
         rsync zlib1g bzip2 build-essential git \
         php8.3-cli php8.3-xml php8.3-mysql \
-        make unzip wget git gnumeric pigz ghostscript \
+        make unzip wget curl git gnumeric pigz ghostscript \
         apptainer && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
