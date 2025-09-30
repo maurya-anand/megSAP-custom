@@ -38,9 +38,9 @@ msisensor=$CONTAINER_FOLDER/msisensor-pro_$MSISENSOR_VERSION.sif
 cd $dbs
 mkdir -p Ensembl
 cd Ensembl
-wget -O Homo_sapiens.GRCh38.115.gff3.gz https://ftp.ensembl.org/pub/release-115/gff3/homo_sapiens/Homo_sapiens.GRCh38.115.gff3.gz
+wget --no-check-certificate -O Homo_sapiens.GRCh38.115.gff3.gz https://ftp.ensembl.org/pub/release-115/gff3/homo_sapiens/Homo_sapiens.GRCh38.115.gff3.gz
 gunzip Homo_sapiens.GRCh38.115.gff3.gz
-wget -O Homo_sapiens.GRCh38.115_original.gtf.gz https://ftp.ensembl.org/pub/release-115/gtf/homo_sapiens/Homo_sapiens.GRCh38.115.gtf.gz
+wget --no-check-certificate -O Homo_sapiens.GRCh38.115_original.gtf.gz https://ftp.ensembl.org/pub/release-115/gtf/homo_sapiens/Homo_sapiens.GRCh38.115.gtf.gz
 gunzip Homo_sapiens.GRCh38.115_original.gtf.gz
 # create sorted & indexed file for methylartist
 (grep ^"#" Homo_sapiens.GRCh38.115_original.gtf; grep -v ^"#" Homo_sapiens.GRCh38.115_original.gtf | sort -k1,1 -k4,4n | sed -e 's/^/chr/') | singularity exec $htslib bgzip  > Homo_sapiens.GRCh38.115.gtf.gz
@@ -49,15 +49,15 @@ singularity exec $htslib tabix -p gff Homo_sapiens.GRCh38.115.gtf.gz
 cd $dbs
 mkdir -p RefSeq
 cd RefSeq
-wget -O GCF_000001405.40_GRCh38.p14_genomic.gff.gz https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_genomic.gff.gz
+wget --no-check-certificate -O GCF_000001405.40_GRCh38.p14_genomic.gff.gz https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_genomic.gff.gz
 zcat GCF_000001405.40_GRCh38.p14_genomic.gff.gz > Homo_sapiens.GRCh38.p14.gff3
 
 #Install CancerHotspots.org
 cd $dbs
 mkdir -p cancerhotspots
 cd cancerhotspots
-wget -O hotspots_v2.xls https://www.cancerhotspots.org/files/hotspots_v2.xls
-wget -O cancerhotspots.v2.maf.gz https://cbioportal-download.s3.amazonaws.com/cancerhotspots.v2.maf.gz
+wget --no-check-certificate -O hotspots_v2.xls https://www.cancerhotspots.org/files/hotspots_v2.xls
+wget --no-check-certificate -O cancerhotspots.v2.maf.gz https://cbioportal-download.s3.amazonaws.com/cancerhotspots.v2.maf.gz
 ssconvert -O 'separator="	" format=raw' -T Gnumeric_stf:stf_assistant -S hotspots_v2.xls hotspots.tsv
 php $src/Install/db_converter_cancerhotspots.php -in hotspots.tsv.0 -maf cancerhotspots.v2.maf.gz -out cancerhotspots_snv.tsv
 rm hotspots_v2.xls
@@ -69,7 +69,7 @@ rm cancerhotspots.v2.maf.gz
 cd $dbs
 mkdir -p ClinGen
 cd ClinGen
-wget -O ClinGen_gene_curation_list_GRCh38.tsv http://ftp.clinicalgenome.org/ClinGen_gene_curation_list_GRCh38.tsv
+wget --no-check-certificate -O ClinGen_gene_curation_list_GRCh38.tsv http://ftp.clinicalgenome.org/ClinGen_gene_curation_list_GRCh38.tsv
 cat ClinGen_gene_curation_list_GRCh38.tsv | php $src/Install/db_converter_clingen_dosage.php > dosage_sensitive_disease_genes_GRCh38.bed
 singularity exec $ngsbits BedSort -in dosage_sensitive_disease_genes_GRCh38.bed -out dosage_sensitive_disease_genes_GRCh38.bed
 
@@ -84,17 +84,17 @@ php $src/Install/db_converter_ncg.php -in ncg.tsv -prefix NCG7.1 -outfolder "."
 cd $dbs
 mkdir -p RepeatMasker
 cd RepeatMasker
-wget -O - http://www.repeatmasker.org/genomes/hg38/RepeatMasker-rm405-db20140131/hg38.fa.out.gz | gunzip > hg38.fa.out
+wget --no-check-certificate -O - http://www.repeatmasker.org/genomes/hg38/RepeatMasker-rm405-db20140131/hg38.fa.out.gz | gunzip > hg38.fa.out
 cat hg38.fa.out | php $src/Install/db_converter_repeatmasker.php | singularity exec $ngsbits BedSort > RepeatMasker_GRCh38.bed
 
 #Install ClinVar - https://www.ncbi.nlm.nih.gov/clinvar/
 cd $dbs
 mkdir -p ClinVar 
 cd ClinVar
-wget -O - https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/archive_2.0/2025/clinvar_20250907.vcf.gz | gunzip | php $src/Install/db_converter_clinvar.php | singularity exec $ngsbits VcfStreamSort | singularity exec $htslib bgzip > clinvar_20250907_converted_GRCh38.vcf.gz
+wget --no-check-certificate -O - https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/archive_2.0/2025/clinvar_20250907.vcf.gz | gunzip | php $src/Install/db_converter_clinvar.php | singularity exec $ngsbits VcfStreamSort | singularity exec $htslib bgzip > clinvar_20250907_converted_GRCh38.vcf.gz
 singularity exec $htslib tabix -C -m 9 -p vcf clinvar_20250907_converted_GRCh38.vcf.gz
 #CNVs
-wget -O - https://ftp.ncbi.nlm.nih.gov/pub/clinvar/tab_delimited/archive/variant_summary_2025-09.txt.gz | gunzip > variant_summary_2025-09.txt
+wget --no-check-certificate -O - https://ftp.ncbi.nlm.nih.gov/pub/clinvar/tab_delimited/archive/variant_summary_2025-09.txt.gz | gunzip > variant_summary_2025-09.txt
 cat variant_summary_2025-09.txt | php $src/Install/db_converter_clinvar_cnvs.php 5 "Pathogenic/Likely pathogenic" | sort | uniq > clinvar_cnvs_2025-09.bed
 singularity exec $ngsbits BedSort -with_name -in clinvar_cnvs_2025-09.bed -out clinvar_cnvs_2025-09.bed
 
@@ -102,40 +102,40 @@ singularity exec $ngsbits BedSort -with_name -in clinvar_cnvs_2025-09.bed -out c
 cd $dbs
 mkdir -p HGNC
 cd HGNC
-wget -O - https://storage.googleapis.com/public-download-files/hgnc/archive/archive/monthly/tsv/hgnc_complete_set_2025-09-02.tsv > hgnc_complete_set_2025-09-02.tsv
-wget -O - https://storage.googleapis.com/public-download-files/hgnc/archive/archive/monthly/tsv/withdrawn_2025-09-02.tsv > hgnc_withdrawn_2025-09-02.tsv
+wget --no-check-certificate -O - https://storage.googleapis.com/public-download-files/hgnc/archive/archive/monthly/tsv/hgnc_complete_set_2025-09-02.tsv > hgnc_complete_set_2025-09-02.tsv
+wget --no-check-certificate -O - https://storage.googleapis.com/public-download-files/hgnc/archive/archive/monthly/tsv/withdrawn_2025-09-02.tsv > hgnc_withdrawn_2025-09-02.tsv
 
 #Install gnomAD (genome data) - 
 cd $dbs
 mkdir -p gnomAD
 cd gnomAD
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr1.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php -header > gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr2.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr3.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr4.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr5.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr6.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr7.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr8.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr9.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr10.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr11.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr12.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr13.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr14.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr15.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr16.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr17.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr18.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr19.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr20.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr21.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr22.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chrX.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chrY.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr1.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php -header > gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr2.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr3.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr4.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr5.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr6.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr7.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr8.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr9.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr10.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr11.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr12.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr13.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr14.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr15.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr16.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr17.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr18.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr19.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr20.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr21.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chr22.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chrX.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/vcf/genomes/gnomad.genomes.v4.1.sites.chrY.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort | php $src/Install/db_converter_gnomad.php >> gnomAD_genome_v4.1_GRCh38.vcf
 singularity exec $htslib bgzip gnomAD_genome_v4.1_GRCh38.vcf
 singularity exec $htslib tabix -C -m 9 -p vcf gnomAD_genome_v4.1_GRCh38.vcf.gz
-wget -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/3.1/vcf/genomes/gnomad.genomes.v3.1.sites.chrM.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort >> gnomAD_genome_v3.1.mito_GRCh38.vcf
+wget --no-check-certificate -O - https://storage.googleapis.com/gcp-public-data--gnomad/release/3.1/vcf/genomes/gnomad.genomes.v3.1.sites.chrM.vcf.bgz | gunzip | singularity exec -B $genome_dir $ngsbits VcfLeftNormalize -stream -ref $genome | singularity exec $ngsbits VcfStreamSort >> gnomAD_genome_v3.1.mito_GRCh38.vcf
 singularity exec $htslib bgzip gnomAD_genome_v3.1.mito_GRCh38.vcf
 singularity exec $htslib tabix -C -m 9 -p vcf gnomAD_genome_v3.1.mito_GRCh38.vcf.gz
 
@@ -143,14 +143,14 @@ singularity exec $htslib tabix -C -m 9 -p vcf gnomAD_genome_v3.1.mito_GRCh38.vcf
 cd $dbs
 mkdir -p phyloP
 cd phyloP
-wget -O hg38.phyloP100way.bw http://hgdownload.soe.ucsc.edu/goldenPath/hg38/phyloP100way/hg38.phyloP100way.bw
+wget --no-check-certificate -O hg38.phyloP100way.bw http://hgdownload.soe.ucsc.edu/goldenPath/hg38/phyloP100way/hg38.phyloP100way.bw
 
 #Install CADD
 cd $dbs
 mkdir -p CADD
 cd CADD
-wget -O - https://krishna.gs.washington.edu/download/CADD/v1.7/GRCh38/gnomad.genomes.r4.0.indel.tsv.gz > CADD_InDels_1.7_GRCh38.tsv.gz
-wget -O - https://krishna.gs.washington.edu/download/CADD/v1.7/GRCh38/whole_genome_SNVs.tsv.gz > CADD_SNVs_1.7_GRCh38.tsv.gz
+wget --no-check-certificate -O - https://krishna.gs.washington.edu/download/CADD/v1.7/GRCh38/gnomad.genomes.r4.0.indel.tsv.gz > CADD_InDels_1.7_GRCh38.tsv.gz
+wget --no-check-certificate -O - https://krishna.gs.washington.edu/download/CADD/v1.7/GRCh38/whole_genome_SNVs.tsv.gz > CADD_SNVs_1.7_GRCh38.tsv.gz
 zcat CADD_InDels_1.7_GRCh38.tsv.gz | php $src/Install/db_converter_cadd.php -build GRCh38 | singularity exec $ngsbits VcfStreamSort | singularity exec $htslib bgzip > CADD_InDels_1.7_GRCh38.vcf.gz
 singularity exec $htslib tabix -f -C -m 9 -p vcf CADD_InDels_1.7_GRCh38.vcf.gz
 zcat CADD_SNVs_1.7_GRCh38.tsv.gz | php $src/Install/db_converter_cadd.php -build GRCh38 | singularity exec $ngsbits VcfStreamSort | singularity exec $htslib bgzip > CADD_SNVs_1.7_GRCh38.vcf.gz
@@ -163,7 +163,7 @@ rm -rf CADD_SNVs_1.7_GRCh38.tsv.gz CADD_InDels_1.7_GRCh38.tsv.gz
 cd $dbs
 mkdir -p REVEL
 cd REVEL
-wget -O revel-v1.3_all_chromosomes.zip https://zenodo.org/record/7072866/files/revel-v1.3_all_chromosomes.zip
+wget --no-check-certificate -O revel-v1.3_all_chromosomes.zip https://zenodo.org/record/7072866/files/revel-v1.3_all_chromosomes.zip
 unzip -p revel-v1.3_all_chromosomes.zip | php $src/Install/db_converter_revel.php > tmp.vcf
 singularity exec $ngsbits VcfSort -in tmp.vcf -out REVEL_1.3.vcf
 rm tmp.vcf
@@ -175,7 +175,7 @@ singularity exec -B $genome_dir $ngsbits VcfCheck -in REVEL_1.3.vcf.gz -lines 10
 cd $dbs
 mkdir -p AlphaMissense
 cd AlphaMissense
-wget -O AlphaMissense_hg38.tsv.gz https://storage.googleapis.com/dm_alphamissense/AlphaMissense_hg38.tsv.gz
+wget --no-check-certificate -O AlphaMissense_hg38.tsv.gz https://storage.googleapis.com/dm_alphamissense/AlphaMissense_hg38.tsv.gz
 php $src/Install/db_converter_alphamissense.php AlphaMissense_hg38.tsv.gz > AlphaMissense_hg38.vcf
 singularity exec $ngsbits VcfSort -in AlphaMissense_hg38.vcf -out AlphaMissense_hg38.vcf
 singularity exec $htslib bgzip AlphaMissense_hg38.vcf
@@ -193,17 +193,17 @@ cd $dbs
 mkdir -p gene_expression
 cd gene_expression
 #change version number on update
-wget -O - https://www.proteinatlas.org/download/tsv/rna_tissue_consensus.tsv.zip | gunzip > rna_tissue_consensus_v23.tsv
+wget --no-check-certificate -O - https://www.proteinatlas.org/download/tsv/rna_tissue_consensus.tsv.zip | gunzip > rna_tissue_consensus_v23.tsv
 
 #download Ensembl data in GTF format - KEEP AT ENSEMBL VERSION 107, DB import for RNA works on Transcript base and will break if the transcripts change.
 cd $dbs
 mkdir -p gene_annotations
 cd gene_annotations
-wget -O - 'http://ftp.ensembl.org/pub/release-107/gtf/homo_sapiens/Homo_sapiens.GRCh38.107.gtf.gz' | gzip -cd | awk '{ if ($$1 !~ /^#/) { print "chr"$0 } else { print $0 } }' > GRCh38.gtf
+wget --no-check-certificate -O - 'http://ftp.ensembl.org/pub/release-107/gtf/homo_sapiens/Homo_sapiens.GRCh38.107.gtf.gz' | gzip -cd | awk '{ if ($$1 !~ /^#/) { print "chr"$0 } else { print $0 } }' > GRCh38.gtf
 
 #create hemoglobin FASTA file
 cd $misc
-wget -O - 'https://ftp.ensembl.org/pub/release-109/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.fa.gz' | zcat | \
+wget --no-check-certificate -O - 'https://ftp.ensembl.org/pub/release-109/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.fa.gz' | zcat | \
 	awk -v RS=">" -v FS="\n" '$$1 ~ / gene_symbol:(HBA1|HBA2|HBB) / { print ">"$$1; {for (i=2; i<=NF; i++) printf("%s", $$i)}; printf("\n") }' | \
 	sed '/^>/s/ /|kraken:taxid|9606 /' \
 	> human_hemoglobin_tx.fa
@@ -233,7 +233,7 @@ singularity exec $htslib tabix $dbs/GIAB/NA24385_CMRG/high_conf_variants_normali
 cd $dbs
 mkdir -p oradata
 cd oradata
-wget -O orad.2.6.1.tar.gz https://webdata.illumina.com/downloads/software/dragen-decompression/orad.2.6.1.tar.gz
+wget --no-check-certificate -O orad.2.6.1.tar.gz https://webdata.illumina.com/downloads/software/dragen-decompression/orad.2.6.1.tar.gz
 tar xzf orad.2.6.1.tar.gz
 rm orad.2.6.1.tar.gz
 mv orad_2_6_1/oradata/refbin .
@@ -249,7 +249,7 @@ singularity exec -B $genome $msisensor msisensor-pro scan -d $genome -o msisenso
 cd $dbs
 mkdir -p tandem-repeats
 cd tandem-repeats
-wget -O human_GRCh38_no_alt_analysis_set.trf.bed https://raw.githubusercontent.com/fritzsedlazeck/Sniffles/fdf6e6d334353a06872fe98f74fe68cc9a9a7d1f/annotations/human_GRCh38_no_alt_analysis_set.trf.bed
+wget --no-check-certificate -O human_GRCh38_no_alt_analysis_set.trf.bed https://raw.githubusercontent.com/fritzsedlazeck/Sniffles/fdf6e6d334353a06872fe98f74fe68cc9a9a7d1f/annotations/human_GRCh38_no_alt_analysis_set.trf.bed
 
 # # install OMIM (you might need a license; production NGSD has to be available and initialized)
 # cd $dbs

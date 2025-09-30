@@ -22,6 +22,6 @@ mkdir -p $folder
 
 #download InterOp
 cd $folder
-wget https://github.com/Illumina/interop/releases/download/v1.2.4/interop-1.2.4-Linux-GNU.tar.gz
+wget --no-check-certificate https://github.com/Illumina/interop/releases/download/v1.2.4/interop-1.2.4-Linux-GNU.tar.gz
 tar xzf interop-1.2.4-Linux-GNU.tar.gz
 rm interop-1.2.4-Linux-GNU.tar.gz
