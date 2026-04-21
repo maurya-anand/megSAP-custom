@@ -13,6 +13,9 @@ if [ ! -f "$SETTINGS_FILE" ]; then
 fi
 DATA_FOLDER=$(grep -E "^data_folder" "$SETTINGS_FILE" | awk -F ' = ' '{print $2}' | sed "s|\[path\]|$(dirname "$root")|")
 
+export SINGULARITY_BIND="${DATA_FOLDER}:${DATA_FOLDER},${TMPDIR}:/tmp,${TMPDIR}:${TMPDIR}"
+export APPTAINER_BIND="${DATA_FOLDER}:${DATA_FOLDER},${TMPDIR}:/tmp,${TMPDIR}:${TMPDIR}"
+
 dbs=$DATA_FOLDER/dbs/
 misc=$DATA_FOLDER/misc/
 genome_dir=$DATA_FOLDER/genomes/
