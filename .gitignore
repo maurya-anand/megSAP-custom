@@ -233,3 +233,5 @@ notes-comments.txt
 apptainer_container
 interop*
 *.sif
+*.err
+*.out
