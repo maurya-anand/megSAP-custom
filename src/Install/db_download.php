@@ -112,7 +112,7 @@ if (in_array("STAR", $dbs))
 	}
 
     print "Indexing genome '{$genome}' using STAR. This may take a while.\n";
-	$parser->execApptainer("STAR", "STAR", "--runThreadN 20 --runMode genomeGenerate --genomeDir {$star_genome_dir} --genomeFastaFiles {$genome} --sjdbGTFfile {$star_gtf_file}", [$star_genome_dir, $star_gtf_file, $data_folder]);
+	$parser->execApptainer("STAR", "STAR", "--runThreadN 20 --runMode genomeGenerate --genomeDir {$star_genome_dir} --outFileNamePrefix {$star_genome_dir}/ --genomeFastaFiles {$genome} --sjdbGTFfile {$star_gtf_file}", [$star_genome_dir, $star_gtf_file, $data_folder]);
 }
 
 if (in_array("Clair3", $dbs))
